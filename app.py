@@ -714,6 +714,22 @@ if total_income > 0:
     st.info(
         f"⚖️ Expense to Income Ratio: {expense_income_ratio:.2f}%"
     )
+
+# ============================================================
+# INCOME VS EXPENSE PROGRESS
+# ============================================================
+
+st.subheader("📊 Income vs Expense")
+
+if total_income > 0:
+    income_progress = 1.0
+    expense_progress = total_expense / total_income
+
+    st.write("💰 Income")
+    st.progress(income_progress)
+
+    st.write("💸 Expenses")
+    st.progress(min(expense_progress, 1.0))
 # ============================================================
 # TOP SPENDING CATEGORIES
 # ============================================================
