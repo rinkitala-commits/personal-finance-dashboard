@@ -102,7 +102,7 @@ python -m streamlit run app.py
 
 ## 👩‍💻 Author
 
-**Rinki Tala**
+**Jhumarani Tala**
 
 GitHub:
 https://github.com/rinkitala-commits
