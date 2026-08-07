@@ -6,6 +6,9 @@ import analytics
 import charts
 import filters
 import downloads
+from database.database_manager import create_transactions_table
+
+create_transactions_table()
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -23,7 +26,7 @@ st.set_page_config(
 # ============================================================
 
 
-from database import load_transactions
+from data_manager import load_transactions
 
 df = load_transactions()
 
