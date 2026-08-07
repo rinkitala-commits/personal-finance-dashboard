@@ -1,7 +1,11 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
-
+import analytics
+import charts
+import filters
+import downloads
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -18,7 +22,10 @@ st.set_page_config(
 # LOAD DATA
 # ============================================================
 
-df = pd.read_csv("data/transactions.csv")
+
+from database import load_transactions
+
+df = load_transactions()
 
 
 # ============================================================
@@ -117,25 +124,11 @@ else:
 # ============================================================
 # APPLY FILTERS
 # ============================================================
-
-filtered_df = df.copy()
-
-# Apply category filter
-if selected_category != "All":
-    filtered_df = filtered_df[
-        filtered_df["Category"] == selected_category
-    ].copy()
-
-
-# Apply date filter safely
-if isinstance(selected_date_range, tuple):
-    if len(selected_date_range) == 2:
-        start_date, end_date = selected_date_range
-
-        filtered_df = filtered_df[
-            (filtered_df["Date"].dt.date >= start_date)
-            & (filtered_df["Date"].dt.date <= end_date)
-        ].copy()
+filtered_df = filters.apply_filters(
+    df,
+    selected_category,
+    selected_date_range
+)
 
 # ============================================================
 # NO DATA CHECK
@@ -203,83 +196,31 @@ st.sidebar.download_button(
 # FINANCIAL CALCULATIONS
 # ============================================================
 
-total_income = filtered_df["Income"].sum()
+income = analytics.total_income(filtered_df)
+expense = analytics.total_expense(filtered_df)
+current_balance = analytics.balance(filtered_df)
+current_savings_rate = analytics.savings_rate(filtered_df)
+current_expense_percentage = analytics.expense_percentage(filtered_df)
+expense_by_category = analytics.expense_by_category(filtered_df)
 
-total_expense = filtered_df["Expense"].sum()
-
-balance = total_income - total_expense
-
-savings_rate = (
-    balance / total_income * 100
-    if total_income > 0
-    else 0
-)
-
-expense_percentage = (
-    total_expense / total_income * 100
-    if total_income > 0
-    else 0
-)
 # ============================================================
 # MONTHLY ANALYSIS
 # ============================================================
 
-filtered_df["Month"] = (
-    filtered_df["Date"]
-    .dt.to_period("M")
-    .astype(str)
-)
-
-monthly_income = (
-    filtered_df.groupby("Month")["Income"]
-    .sum()
-)
-
-monthly_expenses = (
-    filtered_df.groupby("Month")["Expense"]
-    .sum()
-)
-
-monthly_savings = (
-    monthly_income - monthly_expenses
-)
-
-monthly_summary = pd.DataFrame({
-    "Income": monthly_income,
-    "Expenses": monthly_expenses,
-    "Savings": monthly_savings
-})
-
-monthly_summary["Savings Rate (%)"] = (
-    monthly_summary["Savings"]
-    / monthly_summary["Income"]
-    * 100
-).fillna(0).round(2)
-
-monthly_summary["Expense Percentage (%)"] = (
-    monthly_summary["Expenses"]
-    / monthly_summary["Income"]
-    * 100
-).fillna(0).round(2)
-
+monthly_summary = analytics.monthly_summary(filtered_df)
 
 # ============================================================
 # EXPENSE BY CATEGORY
 # ============================================================
 
-expense_by_category = (
-    filtered_df[filtered_df["Expense"] > 0]
-    .groupby("Category")["Expense"]
-    .sum()
-    .sort_values(ascending=False)
-)
+st.header("📊 Expense by Category")
+
 # ============================================================
 # DOWNLOAD EXPENSE BY CATEGORY
 # ============================================================
 
-expense_by_category_csv = (
-    expense_by_category
-    .to_csv(header=["Expense"], index=True)
+expense_by_category_csv = downloads.to_csv(
+    expense_by_category.to_frame(name="Expense")
 )
 
 st.sidebar.download_button(
@@ -312,22 +253,22 @@ col1, col2, col3, col4, col5 = st.columns(5)
 
 col1.metric(
     "💰 Total Income",
-    f"₹{total_income:,.2f}"
+    f"₹{income:,.2f}"
 )
 
 col2.metric(
     "💸 Total Expenses",
-    f"₹{total_expense:,.2f}"
+    f"₹{expense:,.2f}"
 )
 
 col3.metric(
     "💵 Balance",
-    f"₹{balance:,.2f}"
+    f"₹{current_balance:,.2f}"
 )
 
 col4.metric(
     "📈 Savings Rate",
-    f"{savings_rate:.2f}%"
+    f"{current_savings_rate:.2f}%"
 )
 
 col5.metric(
@@ -340,7 +281,7 @@ col5.metric(
 
 st.metric(
     "📊 Expense Percentage",
-    f"{expense_percentage:.2f}%"
+    f"{current_expense_percentage:.2f}%"
 )
 
 # ============================================================
@@ -448,23 +389,23 @@ else:
 
 st.subheader("💰 Savings Progress")
 
-savings_progress = min(max(savings_rate / 100, 0.0), 1.0)
+savings_progress = min(max(current_savings_rate / 100, 0.0), 1.0)
 
 st.progress(savings_progress)
 
 st.write(
-    f"You are saving {savings_rate:.2f}% of your income."
+    f"You are saving {current_savings_rate:.2f}% of your income."
 )
 
 # ============================================================
 # SAVINGS STATUS
 # ============================================================
 
-if savings_rate >= 50:
+if current_savings_rate >= 50:
     st.success("🎉 Excellent! You are saving more than half of your income.")
-elif savings_rate >= 20:
+elif current_savings_rate >= 20:
     st.info("👍 Good job! You have a healthy savings rate.")
-elif savings_rate > 0:
+elif current_savings_rate > 0:
     st.warning("⚠️ Your savings rate is low. Consider reviewing your expenses.")
 else:
     st.error("🚨 You are currently not saving money.")
@@ -473,11 +414,11 @@ else:
 # EXPENSE STATUS
 # ============================================================
 
-if expense_percentage <= 30:
+if current_expense_percentage <= 30:
     st.success("✅ Great! Your expenses are under 30% of your income.")
-elif expense_percentage <= 50:
+elif current_expense_percentage <= 50:
     st.info("👍 Your expenses are within 30%–50% of your income.")
-elif expense_percentage <= 70:
+elif current_expense_percentage <= 70:
     st.warning("⚠️ Your expenses are getting high. Review your spending.")
 else:
     st.error("🚨 Your expenses are very high compared with your income.")
@@ -486,34 +427,34 @@ else:
 # NET CASH FLOW STATUS
 # ============================================================
 
-if balance > 0:
+if current_balance > 0:
     st.success(
-        f"💵 Positive Net Cash Flow: ₹{balance:,.2f}"
+        f"💵 Positive Net Cash Flow: ₹{current_balance:,.2f}"
     )
-elif balance == 0:
+elif current_balance == 0:
     st.info(
         "⚖️ Your income and expenses are equal."
     )
 else:
     st.error(
-        f"🚨 Negative Net Cash Flow: ₹{abs(balance):,.2f}"
+        f"🚨 Negative Net Cash Flow: ₹{abs(current_balance):,.2f}"
     )
 
 # ============================================================
 # SAVINGS AMOUNT STATUS
 # ============================================================
 
-if balance > 0:
+if current_balance > 0:
     st.success(
-        f"💰 You saved ₹{balance:,.2f} during the selected period."
+        f"💰 You saved ₹{current_balance:,.2f} during the selected period."
     )
-elif balance == 0:
+elif current_balance == 0:
     st.info(
         "⚖️ You have no savings during the selected period."
     )
 else:
     st.error(
-        f"⚠️ You spent ₹{abs(balance):,.2f} more than your income."
+        f"⚠️ You spent ₹{abs(current_balance):,.2f} more than your income."
     )
 
 # ============================================================
@@ -522,20 +463,20 @@ else:
 
 st.header("❤️ Financial Health Summary")
 
-if savings_rate >= 50 and expense_percentage <= 30 and balance > 0:
+if current_savings_rate >= 50 and current_expense_percentage <= 30 and current_balance > 0:
     st.success(
         "🟢 Excellent financial health! "
         "You have strong savings, controlled expenses, "
         "and positive cash flow."
     )
 
-elif savings_rate >= 20 and expense_percentage <= 50 and balance > 0:
+elif current_savings_rate >= 20 and current_expense_percentage <= 50 and current_balance > 0:
     st.info(
         "🟡 Good financial health. "
         "Your finances are positive, but there is room for improvement."
     )
 
-elif balance > 0:
+elif current_balance > 0:
     st.warning(
         "🟠 Your finances are positive, "
         "but you should review your spending and savings."
@@ -598,31 +539,10 @@ st.bar_chart(
 # EXPENSE DISTRIBUTION
 # ============================================================
 
-import matplotlib.pyplot as plt
 
 st.header("🥧 Expense Distribution")
 
-fig, ax = plt.subplots(figsize=(7, 7))
-
-explode = [0.08] + [0] * (len(expense_by_category) - 1)
-
-wedges, texts, autotexts = ax.pie(
-    expense_by_category,
-    autopct="%1.1f%%",
-    startangle=90,
-    explode=explode
-)
-
-ax.legend(
-    wedges,
-    expense_by_category.index,
-    title="Categories",
-    loc="center left",
-    bbox_to_anchor=(1, 0.5)
-)
-
-ax.set_ylabel("")
-ax.set_title("Expense Distribution by Category")
+fig = charts.expense_distribution_chart(expense_by_category)
 
 st.pyplot(fig)
 
@@ -630,90 +550,39 @@ st.success(
     f"💸 Total Spending: ₹{expense_by_category.sum():,.2f}"
 )
 
-# ============================================================
-# AVERAGE DAILY EXPENSE
-# ============================================================
-
-days = filtered_df["Date"].dt.date.nunique()
-
-if days > 0:
-    average_daily_expense = total_expense / days
-
-    st.info(
-        f"📅 Average Daily Expense: ₹{average_daily_expense:,.2f}"
-    )
-
-# ============================================================
-# HIGHEST SINGLE EXPENSE
-# ============================================================
-
-highest_expense = filtered_df["Expense"].max()
-
-st.info(
-    f"💳 Highest Single Expense: ₹{highest_expense:,.2f}"
+statistics = analytics.transaction_statistics(
+    filtered_df,
+    income,
+    expense
 )
 
-# ============================================================
-# LOWEST SINGLE EXPENSE
-# ============================================================
-
-expense_transactions = filtered_df[
-    filtered_df["Expense"] > 0
-]
-
-if not expense_transactions.empty:
-    lowest_expense = expense_transactions["Expense"].min()
-
-    st.info(
-        f"🪙 Lowest Single Expense: ₹{lowest_expense:,.2f}"
-    )
-
-# ============================================================
-# HIGHEST INCOME
-# ============================================================
-
-income_transactions = filtered_df[
-    filtered_df["Income"] > 0
-]
-
-if not income_transactions.empty:
-    highest_income = income_transactions["Income"].max()
-
-    st.info(
-        f"💰 Highest Income: ₹{highest_income:,.2f}"
-    )
-
-# ============================================================
-# LOWEST INCOME
-# ============================================================
-
-if not income_transactions.empty:
-    lowest_income = income_transactions["Income"].min()
-
-    st.info(
-        f"💵 Lowest Income: ₹{lowest_income:,.2f}"
-    )
-
-# ============================================================
-# AVERAGE TRANSACTION AMOUNT
-# ============================================================
-
-average_transaction = filtered_df["Amount"].mean()
-
 st.info(
-    f"🧮 Average Transaction Amount: ₹{average_transaction:,.2f}"
+    f"📅 Average Daily Expense: ₹{statistics['average_daily_expense']:,.2f}"
 )
 
-# ============================================================
-# EXPENSE TO INCOME RATIO
-# ============================================================
+st.info(
+    f"💳 Highest Single Expense: ₹{statistics['highest_expense']:,.2f}"
+)
 
-if total_income > 0:
-    expense_income_ratio = (total_expense / total_income) * 100
+st.info(
+    f"🪙 Lowest Single Expense: ₹{statistics['lowest_expense']:,.2f}"
+)
 
-    st.info(
-        f"⚖️ Expense to Income Ratio: {expense_income_ratio:.2f}%"
-    )
+st.info(
+    f"💰 Highest Income: ₹{statistics['highest_income']:,.2f}"
+)
+
+st.info(
+    f"💵 Lowest Income: ₹{statistics['lowest_income']:,.2f}"
+)
+
+st.info(
+    f"🧮 Average Transaction Amount: ₹{statistics['average_transaction']:,.2f}"
+)
+
+st.info(
+    f"⚖️ Expense to Income Ratio: {statistics['expense_income_ratio']:.2f}%"
+)
 
 # ============================================================
 # INCOME VS EXPENSE PROGRESS
@@ -721,9 +590,9 @@ if total_income > 0:
 
 st.subheader("📊 Income vs Expense")
 
-if total_income > 0:
+if income > 0:
     income_progress = 1.0
-    expense_progress = total_expense / total_income
+    expense_progress = expense /income
 
     st.write("💰 Income")
     st.progress(income_progress)
@@ -736,44 +605,16 @@ if total_income > 0:
 
 st.header("🏆 Top Spending Categories")
 
-fig, ax = plt.subplots(figsize=(8, 4))
-
-bars = expense_by_category.sort_values().plot(
-    kind="barh",
-    ax=ax
-)
-
-for container in ax.containers:
-    ax.bar_label(
-        container,
-        fmt="₹%.0f",
-        padding=5
-    )
-
-ax.set_xlabel("Amount (₹)")
-ax.set_ylabel("Category")
-ax.set_title("Top Spending Categories")
+fig = charts.top_spending_chart(expense_by_category)
 
 st.pyplot(fig)
 
 # ============================================================
 # MONTHLY FINANCIAL SUMMARY
 # ============================================================
-
 st.header("📅 Monthly Financial Summary")
 
 monthly_summary_display = monthly_summary.copy()
-
-monthly_summary_display["Transactions"] = (
-    filtered_df.groupby("Month")
-    .size()
-)
-
-monthly_summary_display["Transactions"] = (
-    monthly_summary_display["Transactions"]
-    .fillna(0)
-    .astype(int)
-)
 
 st.dataframe(
     monthly_summary_display,
@@ -864,7 +705,7 @@ category_percentage_chart = (
 
 category_percentage_chart = (
     category_percentage_chart
-    / total_expense
+    / expense
     * 100
 )
 
@@ -942,11 +783,11 @@ financial_summary = pd.DataFrame({
         "Transactions"
     ],
     "Value": [
-        total_income,
-        total_expense,
-        balance,
-        round(savings_rate, 2),
-        round(expense_percentage, 2),
+    income,
+        expense,
+        current_balance,
+        round(current_savings_rate, 2),
+        round(current_expense_percentage, 2),
         len(filtered_df)
     ]
 })
