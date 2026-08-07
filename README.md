@@ -1,45 +1,108 @@
 # 💰 Personal Finance Dashboard
 
-A professional Personal Finance Dashboard built with Python, Pandas, Matplotlib, and Streamlit.
+A modern Personal Finance Dashboard built with **Python**, **Streamlit**, **Pandas**, and **Matplotlib** to help users track income, expenses, savings, and financial health.
 
-## 🚀 Features
+---
 
-- 📊 Financial KPI Cards
-- 💰 Income & Expense Tracking
-- 📅 Date Range Filter
-- 🛒 Category Filter
-- 🔍 Transaction Search
-- 📈 Monthly Financial Summary
+## 📸 Dashboard Preview
+
+> *(Screenshots will be added later.)*
+
+---
+
+## ✨ Features
+
+- 📊 Financial KPI Dashboard
+- 💰 Income Tracking
+- 💸 Expense Tracking
+- 📅 Monthly Financial Summary
 - 🥧 Expense Distribution Pie Chart
-- 📊 Spending Analysis
-- 💾 CSV Report Downloads
-- 📉 Savings Analysis
-- 📋 Interactive Transaction Table
+- 🏆 Top Spending Categories
+- 🔎 Category & Date Filters
+- 📥 CSV Download Reports
+- 📈 Savings Rate
+- ⚖️ Expense-to-Income Ratio
+- 📊 Average Daily Expense
+- 💳 Highest & Lowest Transactions
+- 📂 Modular Project Architecture
 
-## 🛠 Technologies Used
+---
+
+## 🛠 Tech Stack
 
 - Python
 - Streamlit
 - Pandas
 - Matplotlib
+- Git
+- GitHub
 
-## ▶️ Run the Project
+---
+
+## 📂 Project Structure
+
+```text
+personal-finance-dashboard/
+│
+├── app.py
+├── analytics.py
+├── charts.py
+├── filters.py
+├── downloads.py
+├── database.py
+├── processor.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── data/
+```
+
+---
+
+## 🚀 Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/rinkitala-commits/personal-finance-dashboard.git
+```
+
+Go to the project
+
+```bash
+cd personal-finance-dashboard
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the dashboard
 
 ```bash
 python -m streamlit run app.py
 ```
 
-## 📂 Project Structure
+---
 
-```
-personal-finance-dashboard/
-│
-├── app.py
-├── processor.py
-├── analytics.py
-├── database.py
-├── requirements.txt
-├── README.md
-├── data/
-└── .gitignore
-```
+## 📈 Future Improvements
+
+- Budget Planner
+- SQLite Database
+- PDF Reports
+- Excel Export
+- Interactive Plotly Charts
+- AI Spending Insights
+- User Authentication
+- Cloud Deployment
+
+---
+
+## 👩‍💻 Author
+
+**Rinki Tala**
+
+GitHub:
+https://github.com/rinkitala-commits
