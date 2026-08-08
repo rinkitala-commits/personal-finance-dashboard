@@ -294,83 +294,132 @@ monthly_summary = analytics.monthly_summary(filtered_df)
 # ============================================================
 
 st.header("📊 Financial Overview")
+
 transaction_count = len(filtered_df)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3 = st.columns(3)
 
-col1.metric(
-    "💰 Total Income",
-    f"₹{income:,.2f}"
-)
+with col1:
+    st.metric(
+        "💰 Total Income",
+        f"₹{income:,.2f}"
+    )
 
-col2.metric(
-    "💸 Total Expenses",
-    f"₹{expense:,.2f}"
-)
+with col2:
+    st.metric(
+        "💸 Total Expenses",
+        f"₹{expense:,.2f}"
+    )
 
-col3.metric(
-    "💵 Balance",
-    f"₹{current_balance:,.2f}"
-)
+with col3:
+    st.metric(
+        "💵 Balance",
+        f"₹{current_balance:,.2f}"
+    )
 
-col4.metric(
-    "📈 Savings Rate",
-    f"{current_savings_rate:.2f}%"
-)
 
-col5.metric(
-    "🧾 Transactions",
-    transaction_count
-)
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    st.metric(
+        "📈 Savings Rate",
+        f"{current_savings_rate:.2f}%"
+    )
+
+with col5:
+    st.metric(
+        "📊 Expense Percentage",
+        f"{current_expense_percentage:.2f}%"
+    )
+
+with col6:
+    st.metric(
+        "🧾 Transactions",
+        transaction_count
+    )
 
 # ============================================================
-# EXPENSE PERCENTAGE
-# ============================================================
-
-st.metric(
-    "📊 Expense Percentage",
-    f"{current_expense_percentage:.2f}%"
-)
-
-# ============================================================
-# INCOME VS EXPENSE PROGRESS
+# INCOME VS EXPENSE
 # ============================================================
 
 st.subheader("📊 Income vs Expense")
 
+income_col, expense_col = st.columns(2)
+
+with income_col:
+    st.metric(
+        "💰 Income",
+        f"₹{income:,.2f}"
+    )
+
+with expense_col:
+    st.metric(
+        "💸 Expenses",
+        f"₹{expense:,.2f}"
+    )
+
 if income > 0:
-    income_progress = 1.0
-    expense_progress = expense /income
+    expense_ratio = (expense / income) * 100
 
-    st.write("💰 Income")
-    st.progress(income_progress)
+    st.caption(
+        f"💡 You spent {expense_ratio:.2f}% of your income."
+    )
 
-    st.write("💸 Expenses")
-    st.progress(min(expense_progress, 1.0))
+    st.progress(
+        min(expense_ratio / 100, 1.0)
+    )
+else:
+    st.info("No income available for comparison.")
+
 # ============================================================
 # EXPENSE BY CATEGORY
 # ============================================================
 
 st.header("📊 Expense by Category")
 
-fig = charts.expense_distribution_chart(
-    expense_by_category
-)
+if expense_by_category.empty:
 
-st.pyplot(fig)
+    st.info("No expense data available for the selected filters.")
+
+else:
+
+    fig = charts.expense_distribution_chart(
+        expense_by_category
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    st.caption(
+        "💡 This chart shows how your total expenses are distributed across categories."
+    )
+
 # ============================================================
 # TOP SPENDING CATEGORIES
 # ============================================================
 
 st.header("🏆 Top Spending Categories")
 
-fig = charts.top_spending_chart(expense_by_category)
+if expense_by_category.empty:
 
-st.pyplot(fig)
-# ============================================================
-# TRANSACTION DATA
-# ============================================================
+    st.info("No spending data available for the selected filters.")
 
+else:
+
+    fig = charts.top_spending_chart(
+        expense_by_category
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    st.caption(
+        "💡 Categories are ranked by total spending, from highest to lowest."
+    )
 
 # ============================================================
 # TRANSACTION STATISTICS
@@ -378,43 +427,65 @@ st.pyplot(fig)
 
 st.header("📈 Transaction Statistics")
 
-st.success(
-    f"💸 Total Spending: ₹{expense_by_category.sum():,.2f}"
-)
-
 statistics = analytics.transaction_statistics(
     filtered_df,
     income,
     expense
 )
 
-st.info(
-    f"📅 Average Daily Expense: ₹{statistics['average_daily_expense']:,.2f}"
+st.metric(
+    "💸 Total Spending",
+    f"₹{expense_by_category.sum():,.2f}"
 )
 
-st.info(
-    f"💳 Highest Single Expense: ₹{statistics['highest_expense']:,.2f}"
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        "📅 Average Daily Expense",
+        f"₹{statistics['average_daily_expense']:,.2f}"
+    )
+
+with col2:
+    st.metric(
+        "💳 Highest Single Expense",
+        f"₹{statistics['highest_expense']:,.2f}"
+    )
+
+with col3:
+    st.metric(
+        "🪙 Lowest Single Expense",
+        f"₹{statistics['lowest_expense']:,.2f}"
+    )
+
+
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    st.metric(
+        "💰 Highest Income",
+        f"₹{statistics['highest_income']:,.2f}"
+    )
+
+with col5:
+    st.metric(
+        "💵 Lowest Income",
+        f"₹{statistics['lowest_income']:,.2f}"
+    )
+
+with col6:
+    st.metric(
+        "🧮 Average Transaction",
+        f"₹{statistics['average_transaction']:,.2f}"
+    )
+
+
+st.metric(
+    "⚖️ Expense to Income Ratio",
+    f"{statistics['expense_income_ratio']:.2f}%"
 )
 
-st.info(
-    f"🪙 Lowest Single Expense: ₹{statistics['lowest_expense']:,.2f}"
-)
 
-st.info(
-    f"💰 Highest Income: ₹{statistics['highest_income']:,.2f}"
-)
-
-st.info(
-    f"💵 Lowest Income: ₹{statistics['lowest_income']:,.2f}"
-)
-
-st.info(
-    f"🧮 Average Transaction Amount: ₹{statistics['average_transaction']:,.2f}"
-)
-
-st.info(
-    f"⚖️ Expense to Income Ratio: {statistics['expense_income_ratio']:.2f}%"
-)
 # ============================================================
 # TRANSACTION SEARCH
 # ============================================================
@@ -475,54 +546,61 @@ st.caption(
     f"{total_transactions} transactions"
 )
 
-# Transaction table
-st.header("🧾Filtered Transactions")
-
-transaction_display = filtered_df[
-    [
-        "Date",
-        "Description",
-        "Amount",
-        "Category",
-        "Income",
-        "Expense"
-    ]
-].sort_values("Date").copy()
-
 # ============================================================
-# DOWNLOAD FILTERED TRANSACTIONS
+# FILTERED TRANSACTIONS
 # ============================================================
 
-filtered_csv = filtered_df[
-    ["Date", "Description", "Amount", "Category"]
-].to_csv(index=False)
+st.header("🧾 Filtered Transactions")
 
-st.download_button(
-    label="⬇️ Download Filtered Transactions",
-    data=filtered_csv,
-    file_name="filtered_transactions.csv",
-    mime="text/csv"
-)
-
-# Add transaction ID for delete operations
-transaction_display["transaction_id"] = filtered_df["transaction_id"].values
-
-# Format date for display
-transaction_display["Date"] = (
-    transaction_display["Date"]
-    .dt.strftime("%d %b %Y")
-)
- 
 if filtered_df.empty:
-    st.warning(
+
+    st.info(
         "⚠️ No transactions found for the selected filters."
     )
+
 else:
 
-    display_df = transaction_display.drop(
-        columns=["transaction_id"],
-        errors="ignore"
+    transaction_display = filtered_df[
+        [
+            "Date",
+            "Description",
+            "Amount",
+            "Category",
+            "Income",
+            "Expense"
+        ]
+    ].sort_values("Date").copy()
+
+    # ========================================================
+    # DOWNLOAD FILTERED TRANSACTIONS
+    # ========================================================
+
+    filtered_csv = filtered_df[
+        ["Date", "Description", "Amount", "Category"]
+    ].to_csv(index=False)
+
+    st.download_button(
+        label="⬇️ Download Filtered Transactions",
+        data=filtered_csv,
+        file_name="filtered_transactions.csv",
+        mime="text/csv"
     )
+
+    # ========================================================
+    # FORMAT DATE
+    # ========================================================
+
+    transaction_display["Date"] = (
+        transaction_display["Date"]
+        .dt.strftime("%d %b %Y")
+    )
+
+    # ========================================================
+    # DISPLAY TABLE
+    # ========================================================
+
+    display_df = transaction_display.copy()
+
     st.dataframe(
         display_df.style.format({
             "Amount": "₹{:,.2f}",
@@ -531,6 +609,11 @@ else:
         }),
         use_container_width=True,
         hide_index=True
+    )
+
+    st.caption(
+        f"🧾 Showing {visible_transactions} transaction(s) "
+        "matching the selected filters."
     )
 
 # ============================================================
@@ -598,18 +681,33 @@ else:
         "No transactions available to delete."
     )
 
+
 # ============================================================
 # SAVINGS PROGRESS
 # ============================================================
 
-st.subheader("💰 Savings Progress")
+st.header("💰 Savings Progress")
 
-savings_progress = min(max(current_savings_rate / 100, 0.0), 1.0)
+savings_progress = min(
+    max(current_savings_rate / 100, 0.0),
+    1.0
+)
 
-st.progress(savings_progress)
+col1, col2 = st.columns([1, 2])
 
-st.write(
-    f"You are saving {current_savings_rate:.2f}% of your income."
+with col1:
+    st.metric(
+        "💰 Savings Rate",
+        f"{current_savings_rate:.2f}%"
+    )
+
+with col2:
+    st.write("📈 Savings Progress")
+    st.progress(savings_progress)
+
+st.caption(
+    f"You are currently saving {current_savings_rate:.2f}% "
+    "of your income."
 )
 
 # ============================================================
@@ -617,27 +715,28 @@ st.write(
 # ============================================================
 
 if current_savings_rate >= 50:
-    st.success("🎉 Excellent! You are saving more than half of your income.")
+
+    st.success(
+        "🎉 Excellent! You are saving more than half of your income."
+    )
+
 elif current_savings_rate >= 20:
-    st.info("👍 Good job! You have a healthy savings rate.")
+
+    st.info(
+        "👍 Good job! You have a healthy savings rate."
+    )
+
 elif current_savings_rate > 0:
-    st.warning("⚠️ Your savings rate is low. Consider reviewing your expenses.")
+
+    st.warning(
+        "⚠️ Your savings rate is low. Consider reviewing your expenses."
+    )
+
 else:
-    st.error("🚨 You are currently not saving money.")
 
-# ============================================================
-# EXPENSE STATUS
-# ============================================================
-
-if current_expense_percentage <= 30:
-    st.success("✅ Great! Your expenses are under 30% of your income.")
-elif current_expense_percentage <= 50:
-    st.info("👍 Your expenses are within 30%–50% of your income.")
-elif current_expense_percentage <= 70:
-    st.warning("⚠️ Your expenses are getting high. Review your spending.")
-else:
-    st.error("🚨 Your expenses are very high compared with your income.")
-
+    st.error(
+        "🚨 You are currently not saving money."
+    )
 # ============================================================
 # NET CASH FLOW STATUS
 # ============================================================
@@ -707,12 +806,15 @@ else:
 # SPENDING BY CATEGORY
 # ============================================================
 
-st.header("🛒 Spending by Category")
+st.subheader("🛒 Spending by Category")
 
 st.bar_chart(
     expense_by_category
 )
 
+st.caption(
+    "💡 Compare your spending across different categories."
+)
 # ============================================================
 # DOWNLOAD EXPENSE BY CATEGORY
 # ============================================================
@@ -731,13 +833,20 @@ st.sidebar.download_button(
 # ============================================================
 # MONTHLY FINANCIAL SUMMARY
 # ============================================================
-st.header("📅 Monthly Financial Summary")
+
+st.subheader("📅 Monthly Financial Summary")
 
 monthly_summary_display = monthly_summary.copy()
 
 st.dataframe(
     monthly_summary_display,
-    use_container_width=True
+    use_container_width=True,
+    hide_index=False
+)
+
+st.caption(
+    "📅 Monthly overview of income, expenses, savings, "
+    "and financial ratios."
 )
 
 # ============================================================
@@ -756,7 +865,7 @@ st.download_button(
 # MONTHLY INCOME VS EXPENSES
 # ============================================================
 
-st.header("📈 Monthly Income vs Expenses")
+st.subheader("📈 Monthly Income vs Expenses")
 
 monthly_income_expense_chart = monthly_summary[
     ["Income", "Expenses"]
@@ -767,12 +876,16 @@ st.bar_chart(
     stack=False
 )
 
+st.caption(
+    "💡 Compare your monthly income with your monthly expenses."
+)
+
 
 # ============================================================
 # MONTHLY SAVINGS
 # ============================================================
 
-st.header("💵 Monthly Savings")
+st.subheader("💵 Monthly Savings")
 
 monthly_savings_chart = monthly_summary[
     ["Savings"]
@@ -782,11 +895,15 @@ st.line_chart(
     monthly_savings_chart
 )
 
+st.caption(
+    "💡 Track how your monthly savings change over time."
+)
+
 # ============================================================
 # MONTHLY SAVINGS RATE
 # ============================================================
 
-st.header("📊 Monthly Savings Rate")
+st.subheader("📊 Monthly Savings Rate")
 
 monthly_savings_rate_chart = monthly_summary[
     ["Savings Rate (%)"]
@@ -796,11 +913,16 @@ st.line_chart(
     monthly_savings_rate_chart
 )
 
+st.caption(
+    "💡 Track the percentage of income saved each month."
+)
+
+
 # ============================================================
 # MONTHLY EXPENSE PERCENTAGE
 # ============================================================
 
-st.header("📉 Monthly Expense Percentage")
+st.subheader("📉 Monthly Expense Percentage")
 
 monthly_expense_percentage_chart = monthly_summary[
     ["Expense Percentage (%)"]
@@ -810,11 +932,15 @@ st.line_chart(
     monthly_expense_percentage_chart
 )
 
+st.caption(
+    "💡 Track the percentage of income spent each month."
+)
+
 # ============================================================
 # CATEGORY SPENDING PERCENTAGE
 # ============================================================
 
-st.header("📊 Spending Percentage by Category")
+st.subheader("📊 Spending Percentage by Category")
 
 category_percentage_chart = (
     filtered_df[filtered_df["Expense"] > 0]
@@ -837,6 +963,10 @@ category_percentage_chart = (
 st.bar_chart(
     category_percentage_chart
 )
+
+st.caption(
+    "💡 Compare the percentage spending across different categories."
+)
 # ============================================================
 # DOWNLOAD CATEGORY SPENDING PERCENTAGE
 # ============================================================
@@ -857,7 +987,7 @@ st.sidebar.download_button(
 # TOP 3 SPENDING CATEGORIES
 # ============================================================
 
-st.header("🏆 Top 3 Spending Categories")
+st.subheader("🏆 Top 3 Spending Categories")
 
 top_col1, top_col2, top_col3 = st.columns(3)
 
