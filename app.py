@@ -4,9 +4,15 @@ import pandas as pd
 from datetime import datetime
 import analytics
 import charts
+from data_manager import load_transactions
 import filters
 import downloads
-from database.database_manager import create_transactions_table
+from database.database_manager import (
+    create_transactions_table,
+    load_transactions_from_database,
+    add_transaction,
+    delete_transaction
+)
 
 create_transactions_table()
 
@@ -25,11 +31,7 @@ st.set_page_config(
 # LOAD DATA
 # ============================================================
 
-
-from data_manager import load_transactions
-
-df = load_transactions()
-
+df = load_transactions_from_database()
 
 # ============================================================
 # DATA CLEANING
@@ -142,19 +144,7 @@ if filtered_df.empty:
         "⚠️ No transactions found for the selected filters."
     )
     st.stop()
-# ============================================================
-# SELECTED PERIOD
-# ============================================================
 
-if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
-    start_date, end_date = selected_date_range
-
-    st.info(
-        f"📅 Showing financial data from "
-        f"{start_date.strftime('%d %b %Y')} "
-        f"to "
-        f"{end_date.strftime('%d %b %Y')}"
-    )
 # ============================================================
 # ACTIVE TRANSACTION COUNT
 # ============================================================
@@ -194,6 +184,68 @@ st.sidebar.download_button(
     mime="text/csv"
 )
 
+# ============================================================
+# ADD TRANSACTION
+# ============================================================
+
+st.sidebar.header("➕ Add Transaction")
+
+with st.sidebar.form("add_transaction_form"):
+
+    transaction_date = st.date_input(
+        "Date"
+    )
+
+    transaction_description = st.text_input(
+        "Description"
+    )
+
+    transaction_amount = st.number_input(
+        "Amount (₹)",
+        min_value=0.0,
+        step=100.0
+    )
+
+    transaction_type = st.selectbox(
+        "Transaction Type",
+        ["Income", "Expense"]
+    )
+
+    transaction_category = st.text_input(
+        "Category"
+    )
+
+    submit_transaction = st.form_submit_button(
+        "Add Transaction"
+    )
+
+if submit_transaction:
+
+    if not transaction_description.strip():
+        st.sidebar.error("Please enter a description.")
+
+    elif not transaction_category.strip():
+        st.sidebar.error("Please enter a category.")
+
+    elif transaction_amount <= 0:
+        st.sidebar.error("Amount must be greater than ₹0.")
+
+    else:
+
+        if transaction_type == "Expense":
+            database_amount = -transaction_amount
+        else:
+            database_amount = transaction_amount
+
+        add_transaction(
+            transaction_date.strftime("%Y-%m-%d"),
+            transaction_description,
+            database_amount,
+            transaction_category
+        )
+
+        st.sidebar.success("✅ Transaction added successfully!")
+        st.rerun()
 
 # ============================================================
 # FINANCIAL CALCULATIONS
@@ -206,32 +258,6 @@ current_savings_rate = analytics.savings_rate(filtered_df)
 current_expense_percentage = analytics.expense_percentage(filtered_df)
 expense_by_category = analytics.expense_by_category(filtered_df)
 
-# ============================================================
-# MONTHLY ANALYSIS
-# ============================================================
-
-monthly_summary = analytics.monthly_summary(filtered_df)
-
-# ============================================================
-# EXPENSE BY CATEGORY
-# ============================================================
-
-st.header("📊 Expense by Category")
-
-# ============================================================
-# DOWNLOAD EXPENSE BY CATEGORY
-# ============================================================
-
-expense_by_category_csv = downloads.to_csv(
-    expense_by_category.to_frame(name="Expense")
-)
-
-st.sidebar.download_button(
-    label="⬇️ Download Expense by Category",
-    data=expense_by_category_csv,
-    file_name="expense_by_category.csv",
-    mime="text/csv"
-)
 
 
 # ============================================================
@@ -244,6 +270,24 @@ st.write(
     "Track your income, expenses, savings, and spending patterns."
 )
 
+# ============================================================
+# SELECTED PERIOD
+# ============================================================
+
+if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
+    start_date, end_date = selected_date_range
+
+    st.info(
+        f"📅 Showing financial data from "
+        f"{start_date.strftime('%d %b %Y')} "
+        f"to "
+        f"{end_date.strftime('%d %b %Y')}"
+    )
+# ============================================================
+# MONTHLY ANALYSIS
+# ============================================================
+
+monthly_summary = analytics.monthly_summary(filtered_df)
 
 # ============================================================
 # FINANCIAL OVERVIEW
@@ -278,6 +322,7 @@ col5.metric(
     "🧾 Transactions",
     transaction_count
 )
+
 # ============================================================
 # EXPENSE PERCENTAGE
 # ============================================================
@@ -288,9 +333,88 @@ st.metric(
 )
 
 # ============================================================
+# INCOME VS EXPENSE PROGRESS
+# ============================================================
+
+st.subheader("📊 Income vs Expense")
+
+if income > 0:
+    income_progress = 1.0
+    expense_progress = expense /income
+
+    st.write("💰 Income")
+    st.progress(income_progress)
+
+    st.write("💸 Expenses")
+    st.progress(min(expense_progress, 1.0))
+# ============================================================
+# EXPENSE BY CATEGORY
+# ============================================================
+
+st.header("📊 Expense by Category")
+
+fig = charts.expense_distribution_chart(
+    expense_by_category
+)
+
+st.pyplot(fig)
+# ============================================================
+# TOP SPENDING CATEGORIES
+# ============================================================
+
+st.header("🏆 Top Spending Categories")
+
+fig = charts.top_spending_chart(expense_by_category)
+
+st.pyplot(fig)
+# ============================================================
 # TRANSACTION DATA
 # ============================================================
 
+
+# ============================================================
+# TRANSACTION STATISTICS
+# ============================================================
+
+st.header("📈 Transaction Statistics")
+
+st.success(
+    f"💸 Total Spending: ₹{expense_by_category.sum():,.2f}"
+)
+
+statistics = analytics.transaction_statistics(
+    filtered_df,
+    income,
+    expense
+)
+
+st.info(
+    f"📅 Average Daily Expense: ₹{statistics['average_daily_expense']:,.2f}"
+)
+
+st.info(
+    f"💳 Highest Single Expense: ₹{statistics['highest_expense']:,.2f}"
+)
+
+st.info(
+    f"🪙 Lowest Single Expense: ₹{statistics['lowest_expense']:,.2f}"
+)
+
+st.info(
+    f"💰 Highest Income: ₹{statistics['highest_income']:,.2f}"
+)
+
+st.info(
+    f"💵 Lowest Income: ₹{statistics['lowest_income']:,.2f}"
+)
+
+st.info(
+    f"🧮 Average Transaction Amount: ₹{statistics['average_transaction']:,.2f}"
+)
+
+st.info(
+    f"⚖️ Expense to Income Ratio: {statistics['expense_income_ratio']:.2f}%"
+)
 # ============================================================
 # TRANSACTION SEARCH
 # ============================================================
@@ -352,7 +476,7 @@ st.caption(
 )
 
 # Transaction table
-st.header("🧾 Transactions")
+st.header("🧾Filtered Transactions")
 
 transaction_display = filtered_df[
     [
@@ -365,25 +489,113 @@ transaction_display = filtered_df[
     ]
 ].sort_values("Date").copy()
 
+# ============================================================
+# DOWNLOAD FILTERED TRANSACTIONS
+# ============================================================
+
+filtered_csv = filtered_df[
+    ["Date", "Description", "Amount", "Category"]
+].to_csv(index=False)
+
+st.download_button(
+    label="⬇️ Download Filtered Transactions",
+    data=filtered_csv,
+    file_name="filtered_transactions.csv",
+    mime="text/csv"
+)
+
+# Add transaction ID for delete operations
+transaction_display["transaction_id"] = filtered_df["transaction_id"].values
+
 # Format date for display
 transaction_display["Date"] = (
     transaction_display["Date"]
     .dt.strftime("%d %b %Y")
 )
-
+ 
 if filtered_df.empty:
     st.warning(
         "⚠️ No transactions found for the selected filters."
     )
 else:
+
+    display_df = transaction_display.drop(
+        columns=["transaction_id"],
+        errors="ignore"
+    )
     st.dataframe(
-        transaction_display.style.format({
+        display_df.style.format({
             "Amount": "₹{:,.2f}",
             "Income": "₹{:,.2f}",
             "Expense": "₹{:,.2f}"
         }),
         use_container_width=True,
         hide_index=True
+    )
+
+# ============================================================
+# DELETE TRANSACTION
+# ============================================================
+
+st.sidebar.subheader("🗑️ Delete Transaction")
+
+if not filtered_df.empty:
+
+    delete_options = filtered_df[
+        [
+            "transaction_id",
+            "Date",
+            "Description",
+            "Amount",
+            "Category"
+        ]
+    ].copy()
+
+    delete_options["Display"] = (
+        delete_options["Date"].dt.strftime("%d %b %Y")
+        + " | "
+        + delete_options["Description"]
+        + " | ₹"
+        + delete_options["Amount"].abs().map(
+            lambda x: f"{x:,.2f}"
+        )
+        + " | "
+        + delete_options["Category"]
+    )
+
+    selected_transaction = st.sidebar.selectbox(
+        "Select transaction to delete",
+        delete_options["Display"].tolist(),
+        key="delete_transaction_select"
+    )
+
+    delete_button = st.sidebar.button(
+        "🗑️ Delete Selected Transaction",
+        key="delete_transaction_button"
+    )
+
+    if delete_button:
+
+        selected_row = delete_options[
+            delete_options["Display"] == selected_transaction
+        ].iloc[0]
+
+        transaction_id = int(
+            selected_row["transaction_id"]
+        )
+
+        delete_transaction(transaction_id)
+
+        st.sidebar.success(
+            "✅ Transaction deleted successfully!"
+        )
+
+        st.rerun()
+
+else:
+
+    st.sidebar.info(
+        "No transactions available to delete."
     )
 
 # ============================================================
@@ -490,43 +702,6 @@ else:
         "🔴 Your financial position needs attention. "
         "Review your expenses and cash flow."
     )
-# ============================================================
-# FILTERED TRANSACTIONS
-# ============================================================
-
-st.header("📋 Filtered Transactions")
-# ============================================================
-# FILTERED TRANSACTION COUNT
-# ============================================================
-
-transaction_count = len(filtered_df)
-
-st.metric(
-    "🧾 Transactions",
-    transaction_count
-)
-
-st.dataframe(
-    filtered_df[
-        ["Date", "Description", "Amount", "Category"]
-    ],
-    use_container_width=True
-)
-
-# ============================================================
-# DOWNLOAD FILTERED TRANSACTIONS
-# ============================================================
-
-filtered_csv = filtered_df[
-    ["Date", "Description", "Amount", "Category"]
-].to_csv(index=False)
-
-st.download_button(
-    label="⬇️ Download Filtered Transactions",
-    data=filtered_csv,
-    file_name="filtered_transactions.csv",
-    mime="text/csv"
-)
 
 # ============================================================
 # SPENDING BY CATEGORY
@@ -539,78 +714,19 @@ st.bar_chart(
 )
 
 # ============================================================
-# EXPENSE DISTRIBUTION
+# DOWNLOAD EXPENSE BY CATEGORY
 # ============================================================
 
+expense_by_category_csv = expense_by_category.to_frame(
+    name="Expense"
+).to_csv(index=True)
 
-st.header("🥧 Expense Distribution")
-
-fig = charts.expense_distribution_chart(expense_by_category)
-
-st.pyplot(fig)
-
-st.success(
-    f"💸 Total Spending: ₹{expense_by_category.sum():,.2f}"
+st.sidebar.download_button(
+    label="⬇️ Download Expense by Category",
+    data=expense_by_category_csv,
+    file_name="expense_by_category.csv",
+    mime="text/csv"
 )
-
-statistics = analytics.transaction_statistics(
-    filtered_df,
-    income,
-    expense
-)
-
-st.info(
-    f"📅 Average Daily Expense: ₹{statistics['average_daily_expense']:,.2f}"
-)
-
-st.info(
-    f"💳 Highest Single Expense: ₹{statistics['highest_expense']:,.2f}"
-)
-
-st.info(
-    f"🪙 Lowest Single Expense: ₹{statistics['lowest_expense']:,.2f}"
-)
-
-st.info(
-    f"💰 Highest Income: ₹{statistics['highest_income']:,.2f}"
-)
-
-st.info(
-    f"💵 Lowest Income: ₹{statistics['lowest_income']:,.2f}"
-)
-
-st.info(
-    f"🧮 Average Transaction Amount: ₹{statistics['average_transaction']:,.2f}"
-)
-
-st.info(
-    f"⚖️ Expense to Income Ratio: {statistics['expense_income_ratio']:.2f}%"
-)
-
-# ============================================================
-# INCOME VS EXPENSE PROGRESS
-# ============================================================
-
-st.subheader("📊 Income vs Expense")
-
-if income > 0:
-    income_progress = 1.0
-    expense_progress = expense /income
-
-    st.write("💰 Income")
-    st.progress(income_progress)
-
-    st.write("💸 Expenses")
-    st.progress(min(expense_progress, 1.0))
-# ============================================================
-# TOP SPENDING CATEGORIES
-# ============================================================
-
-st.header("🏆 Top Spending Categories")
-
-fig = charts.top_spending_chart(expense_by_category)
-
-st.pyplot(fig)
 
 # ============================================================
 # MONTHLY FINANCIAL SUMMARY

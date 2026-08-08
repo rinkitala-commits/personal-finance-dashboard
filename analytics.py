@@ -29,11 +29,12 @@ def expense_percentage(df):
 
 def expense_by_category(df):
     """
-    Returns total expenses grouped by category.
+    Returns only categories with actual expenses.
     """
     return (
         df.groupby("Category")["Expense"]
         .sum()
+        .loc[lambda x: x > 0]
         .sort_values(ascending=False)
     )
 
