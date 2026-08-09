@@ -748,8 +748,14 @@ else:
 # DOWNLOADS
 # ============================================================
 st.sidebar.divider()
+
 st.sidebar.header("📥 Downloads")
 
+st.sidebar.caption(
+    "Export your financial data and reports as CSV files."
+)
+
+st.sidebar.divider()
 
 # ============================================================
 # DOWNLOAD FILTERED DATA
