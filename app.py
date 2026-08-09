@@ -191,15 +191,20 @@ st.sidebar.metric(
 # ============================================================
 st.sidebar.divider()
 st.sidebar.header("➕ Add Transaction")
+st.sidebar.caption(
+    "Add a new income or expense transaction."
+)
 
 with st.sidebar.form("add_transaction_form"):
 
     transaction_date = st.date_input(
-        "Date"
+        "Date",
+        help="Select the date of this transaction."
     )
 
     transaction_description = st.text_input(
-        "Description"
+    "Description",
+    placeholder="e.g. Grocery shopping, Salary, Electricity bill"
     )
 
     transaction_amount = st.number_input(
@@ -210,11 +215,23 @@ with st.sidebar.form("add_transaction_form"):
 
     transaction_type = st.selectbox(
         "Transaction Type",
-        ["Income", "Expense"]
+        ["Expense", "Income"],
+        help="Choose whether this transaction is money you spent or money you received."
     )
 
-    transaction_category = st.text_input(
-        "Category"
+    transaction_category = st.selectbox(
+        "Category",
+        [
+            "Food",
+            "Shopping",
+            "Bills",
+            "Transport",
+            "Entertainment",
+            "Education",
+            "Health",
+            "Salary",
+            "Other"
+        ]
     )
 
     submit_transaction = st.form_submit_button(
