@@ -942,31 +942,39 @@ st.caption(
 
 st.subheader("📊 Spending Percentage by Category")
 
-category_percentage_chart = (
-    filtered_df[filtered_df["Expense"] > 0]
-    .groupby("Category")["Expense"]
-    .sum()
-)
+if expense > 0:
 
-category_percentage_chart = (
-    category_percentage_chart
-    / expense
-    * 100
-)
+    category_percentage_chart = (
+        filtered_df[filtered_df["Expense"] > 0]
+        .groupby("Category")["Expense"]
+        .sum()
+    )
 
-category_percentage_chart = (
-    category_percentage_chart
-    .sort_values(ascending=False)
-    .round(2)
-)
+    category_percentage_chart = (
+        category_percentage_chart
+        / expense
+        * 100
+    )
 
-st.bar_chart(
-    category_percentage_chart
-)
+    category_percentage_chart = (
+        category_percentage_chart
+        .sort_values(ascending=False)
+        .round(2)
+    )
 
-st.caption(
-    "💡 Compare the percentage spending across different categories."
-)
+    st.bar_chart(
+        category_percentage_chart
+    )
+
+    st.caption(
+        "💡 Compare the percentage of total spending across categories."
+    )
+
+else:
+
+    st.info(
+        "No expense data available for the selected filters."
+    )
 # ============================================================
 # DOWNLOAD CATEGORY SPENDING PERCENTAGE
 # ============================================================
