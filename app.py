@@ -55,8 +55,9 @@ df["Expense"] = df["Amount"].apply(
 # ============================================================
 # FILTERS
 # ============================================================
-
+st.sidebar.divider()
 st.sidebar.header("🔎 Filters")
+
 
 # Available categories
 categories = ["All"] + sorted(
@@ -188,7 +189,7 @@ st.sidebar.metric(
 # ============================================================
 # ADD TRANSACTION
 # ============================================================
-
+st.sidebar.divider()
 st.sidebar.header("➕ Add Transaction")
 
 with st.sidebar.form("add_transaction_form"):
@@ -661,7 +662,7 @@ st.divider()
 # ============================================================
 # DELETE TRANSACTION
 # ============================================================
-
+st.sidebar.divider()
 st.sidebar.header("🗑️ Delete Transaction")
 
 if not filtered_df.empty:
@@ -725,8 +726,9 @@ else:
 # ============================================================
 # DOWNLOADS
 # ============================================================
-
+st.sidebar.divider()
 st.sidebar.header("📥 Downloads")
+
 
 # ============================================================
 # DOWNLOAD FILTERED DATA
