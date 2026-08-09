@@ -103,6 +103,9 @@ selected_category = st.sidebar.selectbox(
     categories,
     key="selected_category"
 )
+st.sidebar.caption(
+    "Choose a category to focus your analysis."
+)
 
 
 # ============================================================
