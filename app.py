@@ -147,13 +147,13 @@ if (
 if selected_category == "All":
 
     st.sidebar.caption(
-        "🛒 Active category: All categories"
+        "📂 Active category: All categories"
     )
 
 else:
 
     st.sidebar.caption(
-        f"🛒 Active category: {selected_category}"
+        f"📂 Active category: {selected_category}"
     )
 
 
