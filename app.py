@@ -680,7 +680,10 @@ st.divider()
 # DELETE TRANSACTION
 # ============================================================
 st.sidebar.divider()
-st.sidebar.header("🗑️ Delete Transaction")
+st.sidebar.subheader("🗑️ Delete Transaction")
+st.sidebar.caption(
+    "Select a transaction below if you want to remove it."
+)
 
 if not filtered_df.empty:
 
@@ -714,7 +717,8 @@ if not filtered_df.empty:
 
     delete_button = st.sidebar.button(
         "🗑️ Delete Selected Transaction",
-        key="delete_transaction_button"
+        key="delete_transaction_button",
+        type = "secondary"
     )
 
     if delete_button:
