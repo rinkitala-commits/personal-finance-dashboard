@@ -109,7 +109,10 @@ selected_category = st.sidebar.selectbox(
 # DATE RANGE FILTER
 # ============================================================
 
-st.sidebar.subheader("📅 Date Filter")
+st.sidebar.subheader("📅 Date Range")
+st.sidebar.caption(
+    "Choose the period you want to analyze."
+)
 
 selected_date_range = st.sidebar.date_input(
     "Select Date Range",
