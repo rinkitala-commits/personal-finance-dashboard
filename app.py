@@ -66,9 +66,8 @@ categories = ["All"] + sorted(
 min_date = df["Date"].min().date()
 max_date = df["Date"].max().date()
 
-
 # ============================================================
-# RESET FILTER CALLBACKS
+# RESET FILTER CALLBACK
 # ============================================================
 
 def reset_filters():
@@ -80,14 +79,30 @@ def reset_filters():
 
 
 # ============================================================
+# RESET BUTTON
+# ============================================================
+
+if st.sidebar.button(
+    "🔄 Reset Filters",
+    use_container_width=True
+):
+    st.session_state.selected_category = "All"
+    st.session_state.selected_date_range = (
+        min_date,
+        max_date
+    )
+    st.rerun()
+
+# ============================================================
 # CATEGORY FILTER
 # ============================================================
 
 selected_category = st.sidebar.selectbox(
-    "Select Category",
+    "🏷️ Category",
     categories,
     key="selected_category"
 )
+
 
 # ============================================================
 # DATE RANGE FILTER
@@ -102,11 +117,17 @@ selected_date_range = st.sidebar.date_input(
     max_value=max_date,
     key="selected_date_range"
 )
+
+
 # ============================================================
-# ACTIVE DATE RANGE
+# ACTIVE FILTER STATUS
 # ============================================================
 
-if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
+if (
+    isinstance(selected_date_range, tuple)
+    and len(selected_date_range) == 2
+):
+
     start_date, end_date = selected_date_range
 
     st.sidebar.caption(
@@ -115,34 +136,41 @@ if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
         f"{end_date.strftime('%d %b %Y')}"
     )
 
-# ============================================================
-# ACTIVE CATEGORY
-# ============================================================
 
 if selected_category == "All":
-    st.sidebar.caption("🛒 Active category: All categories")
+
+    st.sidebar.caption(
+        "🛒 Active category: All categories"
+    )
+
 else:
+
     st.sidebar.caption(
         f"🛒 Active category: {selected_category}"
     )
 
+
 # ============================================================
 # APPLY FILTERS
 # ============================================================
+
 filtered_df = filters.apply_filters(
     df,
     selected_category,
     selected_date_range
 )
 
+
 # ============================================================
 # NO DATA CHECK
 # ============================================================
 
 if filtered_df.empty:
+
     st.warning(
         "⚠️ No transactions found for the selected filters."
     )
+
     st.stop()
 
 # ============================================================
@@ -155,33 +183,6 @@ if filtered_df.empty:
 st.sidebar.metric(
     "🧾 Transactions in View",
     len(filtered_df)
-)
-
-
-# ============================================================
-# DOWNLOAD FILTERED DATA
-# ============================================================
-
-csv_data = filtered_df.to_csv(index=False)
-
-st.sidebar.download_button(
-    label="⬇️ Download Filtered Data",
-    data=csv_data,
-    file_name="filtered_transactions.csv",
-    mime="text/csv"
-)
-
-# ============================================================
-# DOWNLOAD COMPLETE TRANSACTION DATA
-# ============================================================
-
-all_transactions_csv = df.to_csv(index=False)
-
-st.sidebar.download_button(
-    label="⬇️ Download All Transactions",
-    data=all_transactions_csv,
-    file_name="all_transactions.csv",
-    mime="text/csv"
 )
 
 # ============================================================
@@ -216,19 +217,29 @@ with st.sidebar.form("add_transaction_form"):
     )
 
     submit_transaction = st.form_submit_button(
-        "Add Transaction"
+        "➕ Add Transaction"
     )
+
 
 if submit_transaction:
 
     if not transaction_description.strip():
-        st.sidebar.error("Please enter a description.")
+
+        st.sidebar.error(
+            "Please enter a description."
+        )
 
     elif not transaction_category.strip():
-        st.sidebar.error("Please enter a category.")
+
+        st.sidebar.error(
+            "Please enter a category."
+        )
 
     elif transaction_amount <= 0:
-        st.sidebar.error("Amount must be greater than ₹0.")
+
+        st.sidebar.error(
+            "Amount must be greater than ₹0."
+        )
 
     else:
 
@@ -244,7 +255,10 @@ if submit_transaction:
             transaction_category
         )
 
-        st.sidebar.success("✅ Transaction added successfully!")
+        st.sidebar.success(
+            "✅ Transaction added successfully!"
+        )
+
         st.rerun()
 
 # ============================================================
@@ -620,7 +634,7 @@ else:
 # DELETE TRANSACTION
 # ============================================================
 
-st.sidebar.subheader("🗑️ Delete Transaction")
+st.sidebar.header("🗑️ Delete Transaction")
 
 if not filtered_df.empty:
 
@@ -681,6 +695,37 @@ else:
         "No transactions available to delete."
     )
 
+# ============================================================
+# DOWNLOADS
+# ============================================================
+
+st.sidebar.header("📥 Downloads")
+
+# ============================================================
+# DOWNLOAD FILTERED DATA
+# ============================================================
+
+csv_data = filtered_df.to_csv(index=False)
+
+st.sidebar.download_button(
+    label="⬇️ Download Filtered Data",
+    data=csv_data,
+    file_name="filtered_transactions.csv",
+    mime="text/csv"
+)
+
+# ============================================================
+# DOWNLOAD COMPLETE TRANSACTION DATA
+# ============================================================
+
+all_transactions_csv = df.to_csv(index=False)
+
+st.sidebar.download_button(
+    label="⬇️ Download All Transactions",
+    data=all_transactions_csv,
+    file_name="all_transactions.csv",
+    mime="text/csv"
+)
 
 # ============================================================
 # SAVINGS PROGRESS
@@ -855,7 +900,7 @@ st.caption(
 
 monthly_summary_csv = monthly_summary.to_csv(index=True)
 
-st.download_button(
+st.sidebar.download_button(
     label="⬇️ Download Monthly Summary",
     data=monthly_summary_csv,
     file_name="monthly_financial_summary.csv",
@@ -979,17 +1024,22 @@ else:
 # DOWNLOAD CATEGORY SPENDING PERCENTAGE
 # ============================================================
 
-category_percentage_csv = (
-    category_percentage_chart
-    .to_csv(header=["Percentage"], index=True)
-)
+if expense > 0:
 
-st.sidebar.download_button(
-    label="⬇️ Download Category Percentage",
-    data=category_percentage_csv,
-    file_name="category_spending_percentage.csv",
-    mime="text/csv"
-)
+    category_percentage_csv = (
+        category_percentage_chart
+        .to_csv(
+            header=["Percentage"],
+            index=True
+        )
+    )
+
+    st.sidebar.download_button(
+        label="⬇️ Download Category Percentage",
+        data=category_percentage_csv,
+        file_name="category_spending_percentage.csv",
+        mime="text/csv"
+    )
 
 # ============================================================
 # TOP 3 SPENDING CATEGORIES
@@ -1052,20 +1102,12 @@ financial_summary = pd.DataFrame({
 financial_summary_csv = financial_summary.to_csv(index=False)
 
 st.sidebar.download_button(
-    label="⬇️ Download Financial Summary",
+    label="⬇️ Complete Financial Summary",
     data=financial_summary_csv,
     file_name="financial_summary.csv",
     mime="text/csv"
 )
 
-# ============================================================
-# RESET BUTTON
-# ============================================================
-
-st.sidebar.button(
-    "🔄 Reset Filters",
-    on_click=reset_filters
-)
 
 # ============================================================
 # DASHBOARD FOOTER
