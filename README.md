@@ -21,6 +21,30 @@ The dashboard helps users track income and expenses, analyze spending patterns, 
 > Screenshot coming soon.
 
 ---
+## 🌐 Live Demo
+
+> Live demo coming soon.
+
+The dashboard will be deployed online so users can interact with it directly from their browser.
+
+---
+## 📌 Project Status
+
+**Status:** ✅ Completed
+
+The core dashboard functionality is complete, including:
+
+- Financial KPI calculations
+- Transaction management
+- Category and date filtering
+- Financial analytics
+- Charts and visualizations
+- Savings tracking
+- CSV report downloads
+- SQLite database integration
+- Error and empty-data handling
+
+---
 
 ## ✨ Features
 
