@@ -89,10 +89,10 @@ def load_transactions_from_database():
     query = """
     SELECT
         rowid AS transaction_id,
-        Date,
-        Description,
-        Amount,
-        Category
+        date AS Date,
+        description AS Description,
+        amount AS Amount,
+        category AS Category
     FROM transactions
     """
 
