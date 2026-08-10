@@ -85,8 +85,9 @@ def reset_filters():
 
 if st.sidebar.button(
     "🔄 Reset Filters",
-    use_container_width=True
-):
+    on_click=reset_filters,
+    help="Clear the category and date filters."
+    ):
     st.session_state.selected_category = "All"
     st.session_state.selected_date_range = (
         min_date,
