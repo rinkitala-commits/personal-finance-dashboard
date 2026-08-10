@@ -95,6 +95,9 @@ if st.sidebar.button(
     )
     st.rerun()
 
+st.sidebar.caption(
+    "💡 Tip: Use filters to analyze a specific category or time period."
+)
 # ============================================================
 # CATEGORY FILTER
 # ============================================================
