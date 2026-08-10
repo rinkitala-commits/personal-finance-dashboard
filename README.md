@@ -8,17 +8,51 @@ The dashboard helps users track income and expenses, analyze spending patterns, 
 
 ## 📸 Dashboard Preview
 
-### Main Dashboard
+### 📊 Dashboard 1 — Final Overview & Filters
 
-> Screenshot coming soon.
+![Dashboard 1 - Final Overview and Filters](screenshots/Dashboard1.jpeg)
 
-### Transaction Management
+---
 
-> Screenshot coming soon.
+### 💳 Dashboard 2 — Top Spending Categories & Add Transaction
 
-### Financial Analytics
+![Dashboard 2 - Top Spending Categories and Add Transaction](screenshots/Dashboard2.jpeg)
 
-> Screenshot coming soon.
+---
+
+### 📋 Dashboard 3 — Transaction Statistics & Delete Transaction
+
+![Dashboard 3 - Transaction Statistics and Delete Transaction](screenshots/Dashboard3.jpeg)
+
+---
+
+### 🔎 Dashboard 4 — Filtered Transactions & Savings Progress
+
+![Dashboard 4 - Filtered Transactions and Savings Progress](screenshots/Dashboard4.jpeg)
+
+---
+
+### 💰 Dashboard 5 — Savings Status, Financial Health & Downloads
+
+![Dashboard 5 - Savings Status Financial Health and Downloads](screenshots/Dashboard5.jpeg)
+
+---
+
+### 📅 Dashboard 6 — Monthly Financial Summary & Income vs Expenses
+
+![Dashboard 6 - Monthly Financial Summary](screenshots/Dashboard6.jpeg)
+
+---
+
+### 📈 Dashboard 7 — Monthly Savings & Savings Rate
+
+![Dashboard 7 - Monthly Savings and Savings Rate](screenshots/Dashboard7.jpeg)
+
+---
+
+### 📊 Dashboard 8 — Spending Percentage & Top 3 Categories
+
+![Dashboard 8 - Spending Percentage and Top 3 Categories](screenshots/Dashboard8.jpeg)
 
 ---
 ## 🌐 Live Demo
