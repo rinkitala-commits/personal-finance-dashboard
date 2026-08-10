@@ -1,41 +1,80 @@
 # 💰 Personal Finance Dashboard
 
-A modern Personal Finance Dashboard built with **Python**, **Streamlit**, **Pandas**, and **Matplotlib** to help users track income, expenses, savings, and financial health.
+A modern personal finance tracking and analytics dashboard built with **Python, Streamlit, Pandas, and Matplotlib**.
+
+The dashboard helps users track income and expenses, analyze spending patterns, monitor savings, filter transactions, and download financial reports.
 
 ---
 
 ## 📸 Dashboard Preview
 
-> *(Screenshots will be added later.)*
+### Main Dashboard
+
+> Screenshot coming soon.
+
+### Transaction Management
+
+> Screenshot coming soon.
+
+### Financial Analytics
+
+> Screenshot coming soon.
 
 ---
 
 ## ✨ Features
 
-- 📊 Financial KPI Dashboard
-- 💰 Income Tracking
-- 💸 Expense Tracking
-- 📅 Monthly Financial Summary
-- 🥧 Expense Distribution Pie Chart
-- 🏆 Top Spending Categories
-- 🔎 Category & Date Filters
-- 📥 CSV Download Reports
-- 📈 Savings Rate
-- ⚖️ Expense-to-Income Ratio
-- 📊 Average Daily Expense
-- 💳 Highest & Lowest Transactions
-- 📂 Modular Project Architecture
+### 📊 Financial Overview
+- Total Income
+- Total Expenses
+- Current Balance
+- Savings Rate
+- Expense Percentage
+- Expense-to-Income Ratio
+
+### 💳 Transaction Management
+- Add new transactions
+- Delete transactions
+- View filtered transactions
+- Track income and expenses by category
+- Search and filter transaction data
+
+### 📈 Financial Analytics
+- Monthly financial summary
+- Spending by category
+- Category spending percentage
+- Top spending categories
+- Average daily expense
+- Highest transaction
+- Lowest transaction
+- Savings progress
+- Savings status
+
+### 🔎 Filters
+- Category filtering
+- Date-range filtering
+- Reset filters
+
+### 📥 Downloads
+- Filtered transactions
+- All transactions
+- Monthly financial summary
+- Expense by category
+- Top 3 spending categories
+- Category spending percentage
+- Complete financial summary
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-- Python
-- Streamlit
-- Pandas
-- Matplotlib
-- Git
-- GitHub
+- **Python**
+- **Streamlit**
+- **Pandas**
+- **Matplotlib**
+- **SQLite**
+- **Git**
+- **GitHub**
 
 ---
 
@@ -47,15 +86,20 @@ personal-finance-dashboard/
 ├── app.py
 ├── analytics.py
 ├── charts.py
-├── filters.py
+├── data_manager.py
 ├── downloads.py
-├── database.py
+├── filters.py
 ├── processor.py
+│
+├── database/
+│   └── database_manager.py
+│
+├── data/
+│   └── transactions.csv
+│
 ├── requirements.txt
 ├── README.md
-├── .gitignore
-└── data/
-```
+└── .gitignore
 
 ---
 
