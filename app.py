@@ -64,8 +64,14 @@ categories = ["All"] + sorted(
     df["Category"].unique().tolist()
 )
 
-min_date = df["Date"].min().date()
-max_date = df["Date"].max().date()
+valid_dates = df["Date"].dropna()
+
+if not valid_dates.empty:
+    min_date = valid_dates.min().date()
+    max_date = valid_dates.max().date()
+else:
+    min_date = datetime.today().date()
+    max_date = datetime.today().date()
 
 # ============================================================
 # RESET FILTER CALLBACK
