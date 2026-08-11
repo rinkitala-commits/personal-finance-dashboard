@@ -6,6 +6,17 @@ The dashboard helps users track income and expenses, analyze spending patterns, 
 
 ---
 
+## 🌐 Live Demo
+
+🚀 **Try the live dashboard:**
+
+[![Open Live Dashboard](https://img.shields.io/badge/🚀%20Open%20Live%20Dashboard-Streamlit-red?style=for-the-badge)](https://personal-finance-dashboard-g9njk5qduhg3ftvzuuzq8z.streamlit.app/)
+
+👉 [Open Personal Finance Dashboard](https://personal-finance-dashboard-g9njk5qduhg3ftvzuuzq8z.streamlit.app/)
+
+The dashboard is deployed using Streamlit Community Cloud.
+---
+
 ## 📸 Dashboard Preview
 
 ### 📊 Dashboard 1 — Final Overview & Filters
@@ -53,13 +64,6 @@ The dashboard helps users track income and expenses, analyze spending patterns, 
 ### 📊 Dashboard 8 — Spending Percentage & Top 3 Categories
 
 ![Dashboard 8 - Spending Percentage and Top 3 Categories](screenshots/Dashboard8.jpeg)
-
----
-## 🌐 Live Demo
-
-> Live demo coming soon.
-
-The dashboard will be deployed online so users can interact with it directly from their browser.
 
 ---
 ## 📌 Project Status
