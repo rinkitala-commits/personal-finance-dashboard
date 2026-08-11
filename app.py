@@ -10,11 +10,20 @@ import downloads
 from database.database_manager import (
     create_transactions_table,
     load_transactions_from_database,
+    import_csv_to_database,
     add_transaction,
     delete_transaction
 )
 
 create_transactions_table()
+if load_transactions_from_database().empty:
+    import_csv_to_database("data/transactions.csv")
+
+# ============================================================
+# LOAD DATA
+# ============================================================
+
+df = load_transactions_from_database()
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -27,11 +36,7 @@ st.set_page_config(
 )
 
 
-# ============================================================
-# LOAD DATA
-# ============================================================
 
-df = load_transactions_from_database()
 
 # ============================================================
 # DATA CLEANING
