@@ -162,6 +162,7 @@ personal-finance-dashboard/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+```
 
 ---
 
@@ -208,7 +209,9 @@ python -m streamlit run app.py
 
 ## 👩‍💻 Author
 
-**Jhumarani Tala**
+### Jhumarani Tala
+
+B.Tech Data Science Student | Python Developer | Data Science & AI Enthusiast
 
 GitHub:
 https://github.com/rinkitala-commits
